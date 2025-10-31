@@ -1,5 +1,14 @@
 {
-  "query": "Is AI in a hype cycle?",
+  "query": "한국 과학기술정보연구원(KISTI)의 최근 연구 동향은 무엇인가?",
+  "source": "hybrid",
+  "retrievers": ["tavily", "arxiv", "mcp"],
+  "mcp_configs": [
+    {
+      "name": "kisti_mcp",
+      "connection_type": "websocket",
+      "connection_url": "${KISTI_MCP_CONNECTION_URL}"
+    }
+  ],
   "max_sections": 3,
   "publish_formats": {
     "markdown": true,
@@ -7,12 +16,12 @@
     "docx": true
   },
   "include_human_feedback": false,
-  "follow_guidelines": false,
-  "model": "gpt-4o",
+  "follow_guidelines": true,
+  "model": "gpt-4o-mini",
   "guidelines": [
-    "The report MUST be written in APA format",
-    "Each sub section MUST include supporting sources using hyperlinks. If none exist, erase the sub section or rewrite it to be a part of the previous section",
-    "The report MUST be written in spanish"
+    "The report MUST summarize insights from local KISTI documents and web sources.",
+    "Each section MUST cite at least one source from tavily, arXiv, or the KISTI MCP results.",
+    "The report MUST be written in Korean using APA style references."
   ],
   "verbose": true
 }

@@ -23,7 +23,21 @@ class ChiefEditorAgent:
         self.task = task
         self.websocket = websocket
         self.stream_output = stream_output
-        self.headers = headers or {}
+
+        task_headers = task.get("headers") or {}
+        provided_headers = headers or {}
+        # Allow headers defined inside the task to provide defaults that can be overridden by function arguments
+        self.headers = {**task_headers, **provided_headers}
+
+        retrievers_config = task.get("retrievers")
+        if retrievers_config and "retrievers" not in self.headers:
+            if isinstance(retrievers_config, list):
+                retrievers_value = ",".join(retrievers_config)
+            else:
+                retrievers_value = str(retrievers_config)
+            self.headers["retrievers"] = retrievers_value
+
+        self.mcp_configs = task.get("mcp_configs") or []
         self.tone = tone
         self.task_id = self._generate_task_id()
         self.output_dir = self._create_output_directory()
@@ -43,8 +57,8 @@ class ChiefEditorAgent:
     def _initialize_agents(self):
         return {
             "writer": WriterAgent(self.websocket, self.stream_output, self.headers),
-            "editor": EditorAgent(self.websocket, self.stream_output, self.tone, self.headers),
-            "research": ResearchAgent(self.websocket, self.stream_output, self.tone, self.headers),
+            "editor": EditorAgent(self.websocket, self.stream_output, self.tone, self.headers, self.mcp_configs),
+            "research": ResearchAgent(self.websocket, self.stream_output, self.tone, self.headers, self.mcp_configs),
             "publisher": PublisherAgent(self.output_dir, self.websocket, self.stream_output, self.headers),
             "human": HumanAgent(self.websocket, self.stream_output, self.headers)
         }
