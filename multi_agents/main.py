@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import sys
 import os
 import uuid
+from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -14,6 +15,14 @@ from gpt_researcher.utils.enum import Tone
 # Run with LangSmith if API key is set
 if os.environ.get("LANGCHAIN_API_KEY"):
     os.environ["LANGCHAIN_TRACING_V2"] = "true"
+
+# Load environment variables from common locations so the CLI works out of the box
+_ROOT_DIR = Path(__file__).resolve().parent.parent
+_MODULE_DIR = Path(__file__).resolve().parent
+
+# Order matters: project root overrides module defaults, and shell env always wins
+load_dotenv(_MODULE_DIR / ".env")
+load_dotenv(_ROOT_DIR / ".env")
 load_dotenv()
 
 
