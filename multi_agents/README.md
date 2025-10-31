@@ -51,10 +51,7 @@ More specifically (as seen in the architecture diagram) the process is as follow
     ```bash
     pip install -r requirements.txt
     ```
-2. Install the [kisti-mcp](https://github.com/ansua79/kisti-mcp) client so the MCP retriever can launch it:
-    ```bash
-    pip install kisti-mcp
-    ```
+2. Install and configure the [kisti-mcp](https://github.com/ansua79/kisti-mcp) bridge following the repository instructions. The MCP server must be running before you launch the LangGraph workflow.
 3. (Optional) Install [LangSmith](https://docs.smith.langchain.com/) CLI support if you plan to stream traces by exporting `LANGCHAIN_API_KEY`.
 
 ### Configure environment variables
@@ -65,8 +62,8 @@ More specifically (as seen in the architecture diagram) the process is as follow
 2. Open `.env` and provide the following values:
     - `OPENAI_API_KEY` (required) – the default LLM for all agents.
     - `TAVILY_API_KEY` (required when the Tavily retriever is enabled).
-    - `KISTI_API_KEY` and `KISTI_API_SECRET` (required for the MCP bridge).
-    - `KISTI_MCP_BASE_URL` (optional) – override the default MCP endpoint if your deployment differs.
+    - `SCIENCEON_API_KEY`, `SCIENCEON_CLIENT_ID`, and `SCIENCEON_MAC_ADDRESS` (required by the kisti-mcp ScienceON integration).
+    - `KISTI_MCP_CONNECTION_URL` – WebSocket URL of your already-running kisti-mcp server (for example `ws://127.0.0.1:9999`).
     - `DOC_PATH` (optional) – location of your local reference documents, defaults to `./my-docs`.
     - `STRATEGIC_LLM` or `SMART_LLM` (optional) – override the OpenAI model used by the LangGraph agents.
 3. Any variables defined in `.env` are automatically loaded by `multi_agents/main.py`. You can also export them directly in your shell instead of using a file.
@@ -74,7 +71,7 @@ More specifically (as seen in the architecture diagram) the process is as follow
 4. Place your local reference material under `./my-docs` (or set the `DOC_PATH` environment variable to point elsewhere).
 
 ## How to run
-1. Ensure the `kisti-mcp` executable is on your `$PATH`. The default `task.json` will spawn the MCP server automatically using the command listed in its `mcp_configs` section.
+1. Start the `kisti-mcp` MCP server separately (use the launch command recommended in the project, such as `python -m kisti_mcp.server`). Run it with the ScienceON credentials above so the service is listening on the URL you set in `KISTI_MCP_CONNECTION_URL`.
 2. Run the multi-agent workflow from the repository root:
     ```bash
     python multi_agents/main.py
@@ -137,12 +134,12 @@ The example `task.json` in this directory is pre-configured for hybrid research:
 
 - `source` is set to `"hybrid"` so the researcher blends local documents from `./my-docs` with the configured web retrievers.
 - `retrievers` enumerates the engines the agents will call (`tavily`, `arxiv`, and the MCP retriever).
-- `mcp_configs` starts the [kisti-mcp](https://github.com/ansua79/kisti-mcp) server so the MCP retriever can query the institute's APIs. The sample configuration uses environment placeholders such as `${KISTI_API_KEY}` which are resolved automatically when the task file is loaded.
+- `mcp_configs` connects to the running [kisti-mcp](https://github.com/ansua79/kisti-mcp) server so the MCP retriever can query the institute's APIs. The sample configuration uses environment placeholders such as `${KISTI_MCP_CONNECTION_URL}` which are resolved automatically when the task file is loaded.
 
 To get up and running:
 
-1. Install and configure the `kisti-mcp` package following the repository instructions. Ensure the CLI command (`kisti-mcp` by default) is on your `$PATH`.
-2. Provide the required credentials in `.env` or your shell (`KISTI_API_KEY`, `KISTI_API_SECRET`, and optionally `KISTI_MCP_BASE_URL`).
+1. Install and configure the `kisti-mcp` package following the repository instructions. Start the server and confirm its WebSocket endpoint (for example `ws://127.0.0.1:9999`).
+2. Provide the required credentials in `.env` or your shell (`SCIENCEON_API_KEY`, `SCIENCEON_CLIENT_ID`, `SCIENCEON_MAC_ADDRESS`, and `KISTI_MCP_CONNECTION_URL`).
 3. Place your local reference material under `./my-docs` (or set the `DOC_PATH` environment variable to point elsewhere).
 4. Run `python multi_agents/main.py` to launch the multi-agent pipeline.
 

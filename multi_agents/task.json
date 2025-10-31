@@ -4,14 +4,9 @@
   "retrievers": ["tavily", "arxiv", "mcp"],
   "mcp_configs": [
     {
-      "command": "kisti-mcp",
-      "args": [],
       "name": "kisti_mcp",
-      "env": {
-        "KISTI_API_KEY": "${KISTI_API_KEY}",
-        "KISTI_API_SECRET": "${KISTI_API_SECRET}",
-        "KISTI_MCP_BASE_URL": "${KISTI_MCP_BASE_URL}"
-      }
+      "connection_type": "websocket",
+      "connection_url": "${KISTI_MCP_CONNECTION_URL}"
     }
   ],
   "max_sections": 3,
