@@ -62,11 +62,12 @@ More specifically (as seen in the architecture diagram) the process is as follow
 To change the research query and customize the report, edit the `task.json` file in the main directory.
 #### Task.json contains the following fields:
 - `query` - The research query or task.
+- `source` - The location from which to conduct the research. Options: `web`, `local`, or `hybrid` (combine web and local documents).
+- `retrievers` - Optional list of retrievers to use. When omitted GPT Researcher defaults to Tavily. Provide multiple values (e.g. `["tavily", "arxiv", "mcp"]`) to fan out to several knowledge sources.
 - `model` - The OpenAI LLM to use for the agents.
 - `max_sections` - The maximum number of sections in the report. Each section is a subtopic of the research query.
 - `include_human_feedback` - If true, the user can provide feedback to the agents. If false, the agents will work autonomously.
 - `publish_formats` - The formats to publish the report in. The reports will be written in the `output` directory.
-- `source` - The location from which to conduct the research. Options: `web` or `local`. For local, please add `DOC_PATH` env var.
 - `follow_guidelines` - If true, the research report will follow the guidelines below. It will take longer to complete. If false, the report will be generated faster but may not follow the guidelines.
 - `guidelines` - A list of guidelines that the report must follow.
 - `verbose` - If true, the application will print detailed logs to the console.
@@ -77,7 +78,7 @@ To change the research query and customize the report, edit the `task.json` file
   "query": "Is AI in a hype cycle?",
   "model": "gpt-4o",
   "max_sections": 3, 
-  "publish_formats": { 
+  "publish_formats": {
     "markdown": true,
     "pdf": true,
     "docx": true
@@ -93,6 +94,29 @@ To change the research query and customize the report, edit the `task.json` file
   "verbose": true
 }
 ```
+
+### Hybrid research with local documents, Tavily, arXiv and KISTI MCP
+
+The example `task.json` in this directory is pre-configured for hybrid research:
+
+- `source` is set to `"hybrid"` so the researcher blends local documents from `./my-docs` with the configured web retrievers.
+- `retrievers` enumerates the engines the agents will call (`tavily`, `arxiv`, and the MCP retriever).
+- `mcp_configs` starts the [kisti-mcp](https://github.com/ansua79/kisti-mcp) server so the MCP retriever can query the institute's APIs. The sample configuration uses environment placeholders such as `${KISTI_API_KEY}` which are resolved automatically when the task file is loaded.
+
+To get up and running:
+
+1. Install and configure the `kisti-mcp` package following the repository instructions. Ensure the CLI command (`kisti-mcp` by default) is on your `$PATH`.
+2. Export the required credentials (`KISTI_API_KEY`, `KISTI_API_SECRET`, and optionally `KISTI_MCP_BASE_URL`).
+3. Place your local reference material under `./my-docs` (or set the `DOC_PATH` environment variable to point elsewhere).
+4. Run `python main.py` to launch the multi-agent pipeline.
+
+During execution each research agent will:
+
+- index local files for relevant passages,
+- pull web data through Tavily and arXiv,
+- and query KISTI knowledge through the MCP server.
+
+The reviewer, writer, and publisher agents then collaborate on the final Korean APA-style report that merges all of these sources.
 
 ## To Deploy
 

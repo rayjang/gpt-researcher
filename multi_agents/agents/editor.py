@@ -13,11 +13,12 @@ from . import ResearchAgent, ReviewerAgent, ReviserAgent
 class EditorAgent:
     """Agent responsible for editing and managing code."""
 
-    def __init__(self, websocket=None, stream_output=None, tone=None, headers=None):
+    def __init__(self, websocket=None, stream_output=None, tone=None, headers=None, mcp_configs=None):
         self.websocket = websocket
         self.stream_output = stream_output
         self.tone = tone
         self.headers = headers or {}
+        self.mcp_configs = mcp_configs or []
 
     async def plan_research(self, research_state: Dict[str, any]) -> Dict[str, any]:
         """
@@ -118,7 +119,7 @@ class EditorAgent:
     def _initialize_agents(self) -> Dict[str, any]:
         """Initialize the research, reviewer, and reviser skills."""
         return {
-            "research": ResearchAgent(self.websocket, self.stream_output, self.tone, self.headers),
+            "research": ResearchAgent(self.websocket, self.stream_output, self.tone, self.headers, self.mcp_configs),
             "reviewer": ReviewerAgent(self.websocket, self.stream_output, self.headers),
             "reviser": ReviserAgent(self.websocket, self.stream_output, self.headers),
         }
