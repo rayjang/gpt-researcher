@@ -13,7 +13,8 @@ from . import \
     EditorAgent, \
     PublisherAgent, \
     ResearchAgent, \
-    HumanAgent
+    HumanAgent, \
+    ExpertPanelAgent
 
 
 class ChiefEditorAgent:
@@ -60,7 +61,8 @@ class ChiefEditorAgent:
             "editor": EditorAgent(self.websocket, self.stream_output, self.tone, self.headers, self.mcp_configs),
             "research": ResearchAgent(self.websocket, self.stream_output, self.tone, self.headers, self.mcp_configs),
             "publisher": PublisherAgent(self.output_dir, self.websocket, self.stream_output, self.headers),
-            "human": HumanAgent(self.websocket, self.stream_output, self.headers)
+            "human": HumanAgent(self.websocket, self.stream_output, self.headers),
+            "expert_panel": ExpertPanelAgent(self.websocket, self.stream_output, self.headers),
         }
 
     def _create_workflow(self, agents):
@@ -73,6 +75,7 @@ class ChiefEditorAgent:
         workflow.add_node("writer", agents["writer"].run)
         workflow.add_node("publisher", agents["publisher"].run)
         workflow.add_node("human", agents["human"].review_plan)
+        workflow.add_node("expert_panel", agents["expert_panel"].run)
 
         # Add edges
         self._add_workflow_edges(workflow)
@@ -81,13 +84,18 @@ class ChiefEditorAgent:
 
     def _add_workflow_edges(self, workflow):
         workflow.add_edge('browser', 'planner')
-        workflow.add_edge('planner', 'human')
+        workflow.add_edge('planner', 'expert_panel')
         workflow.add_edge('researcher', 'writer')
         workflow.add_edge('writer', 'publisher')
         workflow.set_entry_point("browser")
         workflow.add_edge('publisher', END)
 
         # Add human in the loop
+        workflow.add_conditional_edges(
+            'expert_panel',
+            lambda state: "research" if state.get("needs_more_research") else "review",
+            {"research": "browser", "review": "human"},
+        )
         workflow.add_conditional_edges(
             'human',
             lambda review: "accept" if review['human_feedback'] is None else "revise",

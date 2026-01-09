@@ -35,6 +35,9 @@ class WriterAgent:
         task = research_state.get("task")
         follow_guidelines = task.get("follow_guidelines")
         guidelines = task.get("guidelines")
+        output_format = task.get("output_format") or {}
+        required_sections = output_format.get("required_sections") or []
+        expert_panel = research_state.get("expert_panel")
 
         prompt = [
             {
@@ -48,6 +51,8 @@ class WriterAgent:
                 "content": f"Today's date is {datetime.now().strftime('%d/%m/%Y')}\n."
                 f"Query or Topic: {query}\n"
                 f"Research data: {str(data)}\n"
+                f"Expert panel insights: {str(expert_panel)}\n"
+                f"Required sections for the report: {required_sections}\n"
                 f"Your task is to write an in depth, well written and detailed "
                 f"introduction and conclusion to the research report based on the provided research data. "
                 f"Do not include headers in the results.\n"

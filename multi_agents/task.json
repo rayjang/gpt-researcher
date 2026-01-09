@@ -1,5 +1,5 @@
 {
-  "query": "한국 과학기술정보연구원(KISTI)의 최근 연구 동향은 무엇인가?",
+  "query": "LLM 추론 토큰 절감",
   "source": "hybrid",
   "retrievers": ["tavily", "arxiv", "mcp"],
   "mcp_configs": [
@@ -15,13 +15,14 @@
     "pdf": true,
     "docx": true
   },
-  "include_human_feedback": false,
+  "include_human_feedback": true,
   "follow_guidelines": true,
   "model": "gpt-4o-mini",
   "guidelines": [
-    "The report MUST summarize insights from local KISTI documents and web sources.",
-    "Each section MUST cite at least one source from tavily, arXiv, or the KISTI MCP results.",
-    "The report MUST be written in Korean using APA style references."
+    "The report MUST summarize insights from local documents and web sources.",
+    "Each section MUST cite at least one source from tavily, arXiv, or MCP results.",
+    "The report MUST be written in Korean using APA style references.",
+    "Include the expert panel idea generation and acceptance probability analysis."
   ],
   "verbose": true
 }
