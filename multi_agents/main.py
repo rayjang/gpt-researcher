@@ -5,6 +5,8 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from multi_agents.agents import ChiefEditorAgent
@@ -44,6 +46,13 @@ def _resolve_env_placeholders(value: Any) -> Any:
     return value
 
 
+def _load_yaml_config(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    with path.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file) or None
+
+
 def open_task():
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,6 +63,14 @@ def open_task():
         task = json.load(f)
 
     task = _resolve_env_placeholders(task)
+
+    config_root = _ROOT_DIR / "config"
+    agents_config = _load_yaml_config(config_root / "agents.yaml")
+    if agents_config and not task.get("agent_personas"):
+        task["agent_personas"] = agents_config.get("experts", [])
+    output_format = _load_yaml_config(config_root / "output_format.yaml")
+    if output_format and not task.get("output_format"):
+        task["output_format"] = output_format
 
     if not task:
         raise Exception("No task found. Please ensure a valid task.json file is present in the multi_agents directory and contains the necessary task information.")

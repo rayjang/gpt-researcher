@@ -44,6 +44,9 @@ class ResearchAgent:
     async def run_initial_research(self, research_state: dict):
         task = research_state.get("task")
         query = task.get("query")
+        followup_query = task.get("followup_query")
+        if followup_query:
+            query = f"{query} (추가 조사: {followup_query})"
         source = task.get("source", "web")
 
         if self.websocket and self.stream_output:
